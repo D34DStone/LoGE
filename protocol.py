@@ -10,7 +10,7 @@ class Error(object):
     SERIALIZE_ERROR = "SERALIZATION_ERROR"
     WRONG_REQUEST = "WRONG_REQUEST"
     
-def make_response(datatype, data):
+def make_request(datatype, data):
     if isinstance(data, str):
         data = data.encode()
 

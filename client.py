@@ -1,9 +1,9 @@
 import asyncio 
 import json
-from protocol import Header, Error, make_response, parse_header
+from protocol import Header, Error, make_request, parse_header
 
 async def send_request(reader, writer, data, header=Header.REQUEST):
-    req = make_response(Header.REQUEST, data)
+    req = make_request(Header.REQUEST, data)
     writer.write(req)
     await writer.drain()
     data_type, data_size = parse_header(await reader.readline())

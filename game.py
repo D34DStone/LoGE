@@ -11,13 +11,8 @@ class Game(object):
     
     sessions = dict()
 
-    async def game_loop(self):
-        pass
-
     def auth_handler(self, addr, request):
-        print(request)
         data, err = AuthRequestSchema().load(request)
-        print(data, err)
         if err:
             return Header.ERROR, Error.WRONG_REQUEST
 
@@ -38,10 +33,10 @@ class Game(object):
             }
 
     def process_exnternal_request(self, addr, datasize, data):
-        """ Handles external request and returns result.
+        """Handles external request and returns result.
 
         :param addr: Unique network address of client (socket-address)
-        :return: Returns protocol header of response and data of the response
+        :return: Returns protocol header and data of the response
         """
         if not self.sessions.get(addr):
             self.sessions[addr] = {}
@@ -52,7 +47,6 @@ class Game(object):
             return Header.ERROR, Error.SERIALIZE_ERROR
 
         data, err = BaseRequestSchema().load(request)
-        print(data, err, request)
         if err or not self.request_handlers.get(data["request"]):
             return Header.ERROR, Error.WRONG_REQUEST 
 

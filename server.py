@@ -1,28 +1,29 @@
 import asyncio
-from protocol import Header, Error, make_response, parse_header
+from protocol import Header, Error, make_request, parse_header
 from game import Game
 
+
 class Server(object):
+    """ Object that provides client-server communication througth 
+    the sockets. Also parses incoming requests and seralize outcoming responses. 
+    """
 
     def __init__(self, game, host, port):
         self.game = game
         self.host = host
         self.port = port
 
-
     def handle_data(self, data_type, data_size, socket, data):
         """Cals from `handle_connection` to process clients request.
 
         Actually pass it to game engine.
         """
-        return self.game.process_exnternal_request(socket, 
-            data_size, 
-            data)
+        return self.game.process_exnternal_request(socket, data_size, data)
 
     def handle_disconnection(self, addr):
         """Cals from `handle_connection` to tell game engine that clinet disconnected.
         """
-        print(f"{addr} DISCONNECTED")
+        pass
 
     async def handle_connection(self, reader, writer):
         """Loop that handles signle socket.
@@ -36,15 +37,14 @@ class Server(object):
                     data_type, data_size = parse_header(header)
 
                 except:
-                    resp = make_response(Header.ERROR,
-                                                Error.INVALID_HEADER)
+                    resp = make_request(Header.ERROR, Error.INVALID_HEADER)
                     writer.write(resp)
 
                 else:
                     data = await reader.read(data_size)
                     data_type, data = self.handle_data(data_type, data_size,
                                                        addr, data)
-                    resp = make_response(data_type, data)
+                    resp = make_request(data_type, data)
                     writer.write(resp)
                     if data_type is Header.ABORT:
                         socket_serving = False
