@@ -1,4 +1,5 @@
 from request_schemas import *
+from protocol import Header, Error
 from marshmallow import ValidationError
 import json
 import enum
@@ -7,24 +8,53 @@ import enum
 from marshmallow import pprint
 
 class Game(object):
+    
+    sessions = dict()
 
-    session = dict()
-
-    def __init__(self):
+    async def game_loop(self):
         pass
 
+    def auth_handler(self, addr, request):
+        print(request)
+        data, err = AuthRequestSchema().load(request)
+        print(data, err)
+        if err:
+            return Header.ERROR, Error.WRONG_REQUEST
 
-    def process_external_request(self, socket, data):
+        self.sessions[addr]["uid"] = data["uid"]
+        return Header.RESPONSE, "Authorized!"
+
+    def echo_handler(self, addr, request):
+        data, err = EchoRequestSchema().load(request)
+        if err:
+            return Header.ERROR, Error.WRONG_REQUEST
+
+        echo = f"<{self.sessions[addr]['uid']}>: {request['data']}>"
+        return Header.RESPONSE, echo
+
+    request_handlers = {
+                "auth" : auth_handler,
+                "echo" : echo_handler
+            }
+
+    def process_exnternal_request(self, addr, datasize, data):
+        """ Handles external request and returns result.
+
+        :param addr: Unique network address of client (socket-address)
+        :return: Returns protocol header of response and data of the response
+        """
+        if not self.sessions.get(addr):
+            self.sessions[addr] = {}
+
         try:
-            data = json.loads(data)
+            request = json.loads(data)
         except json.decoder.JSONDecodeError:
-            print("Wrong json")
-            return
+            return Header.ERROR, Error.SERIALIZE_ERROR
 
-        request, errors  = BaseRequestSchema().load(data)
-        if errors:
-            print("Wrong request")
-            return
+        data, err = BaseRequestSchema().load(request)
+        print(data, err, request)
+        if err or not self.request_handlers.get(data["request"]):
+            return Header.ERROR, Error.WRONG_REQUEST 
 
-        pprint(request)
-
+        handler = self.request_handlers[data["request"]]
+        return handler(self, addr, request)
