@@ -1,6 +1,8 @@
 from request_schemas import *
 from protocol import Header, Error
+from engine.engine import Engine 
 from marshmallow import ValidationError
+import asyncio
 import json
 import enum
 import functools
@@ -10,7 +12,23 @@ from marshmallow import pprint
 
 class Game(object):
     
+    ENGINE_ITERATE_INTERVAL = 1
+
     sessions = dict()
+    engine = None
+
+    def __init__(self):
+        self.engine = Engine()
+
+    async def run(self):
+        """Coroutine that provides entery point to world
+        update.
+        """
+        engine_is_working = True
+        print("Engine was launched")
+        while engine_is_working:
+            self.engine.iterate_world()
+            await asyncio.sleep(Game.ENGINE_ITERATE_INTERVAL)
 
     def check_request(request_schema):
         """ Checks if given request is valid.

@@ -1,8 +1,8 @@
 class Header(object):
-    REQUEST = "REQUEST"         # Client uses this header to send request to a serevr-socket
-    RESPONSE = "RESPONSE"       # Server uses this header to send response to a client-socket
-    ABORT = "ABORT"             # Server uses this header to notify about connection abort and the reason
+    REQUEST = "REQUEST"         
+    RESPONSE = "RESPONSE"
     ERROR = "ERROR"
+    ABORT = "ABORT" 
     CONNECTED = "CONNECTED"
     DISCONNECTED = "DISCONNECTED"
     EMPTY = "EMPTY"

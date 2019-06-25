@@ -67,13 +67,3 @@ class Server(object):
                                                  port=self.port)
 
         await self.server.serve_forever()
-
-
-async def main():
-    game = Game()
-    server = Server(game, "localhost", 5000)
-    await server.run()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
