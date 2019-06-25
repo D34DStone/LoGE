@@ -1,15 +1,19 @@
 class Header(object):
-    REQUEST = "REQUEST"
-    RESPONSE = "RESPONSE"
-    ABORT = "ABORT"
+    REQUEST = "REQUEST"         # Client uses this header to send request to a serevr-socket
+    RESPONSE = "RESPONSE"       # Server uses this header to send response to a client-socket
+    ABORT = "ABORT"             # Server uses this header to notify about connection abort and the reason
     ERROR = "ERROR"
-
+    CONNECTED = "CONNECTED"
+    DISCONNECTED = "DISCONNECTED"
+    EMPTY = "EMPTY"
 
 class Error(object):
     INVALID_HEADER = "INVALID_HEADER"
     SERIALIZE_ERROR = "SERALIZATION_ERROR"
     WRONG_REQUEST = "WRONG_REQUEST"
+    FORBIDDEN_REQUEST = "FORBIDDEN_REQUEST"
     
+
 def make_request(datatype, data):
     if isinstance(data, str):
         data = data.encode()

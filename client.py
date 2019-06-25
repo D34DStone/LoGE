@@ -32,7 +32,8 @@ async def loge_client(host, port):
             await send_request(reader, writer, request)
 
         if cmd == "fake":
-            await send_request(reader, writer, "{}", header="REQ")
+            request = json.dumps({"request": "auth"})
+            await send_request(reader, writer, request)
 
         if cmd == "exit":
             break

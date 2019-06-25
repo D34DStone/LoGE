@@ -18,18 +18,21 @@ class Server(object):
 
         Actually pass it to game engine.
         """
-        return self.game.process_exnternal_request(socket, data_size, data)
+        return self.game.process_exnternal_request(socket, data_type, data_size, data)
 
     def handle_disconnection(self, addr):
-        """Cals from `handle_connection` to tell game engine that clinet disconnected.
-        """
-        pass
+        self.game.process_exnternal_request(addr, Header.DISCONNECTED)
 
-    async def handle_connection(self, reader, writer):
-        """Loop that handles signle socket.
+    def handle_connection(self, addr):
+        self.game.process_exnternal_request(addr, Header.CONNECTED)
+
+    async def handle_socket(self, reader, writer):
+        """Loop that handles single socket.
         """
         addr = writer.get_extra_info('peername')
+        self.handle_connection(addr)
         socket_serving = True
+        
         while socket_serving:
             try:
                 header = await reader.readline()
@@ -59,7 +62,7 @@ class Server(object):
         writer.close()
 
     async def run(self):
-        self.server = await asyncio.start_server(self.handle_connection,
+        self.server = await asyncio.start_server(self.handle_socket,
                                                  host=self.host,
                                                  port=self.port)
 
