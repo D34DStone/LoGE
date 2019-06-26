@@ -35,6 +35,10 @@ async def loge_client(host, port):
             request = json.dumps({"request": "auth"})
             await send_request(reader, writer, request)
 
+        if cmd == "init player":
+            request = json.dumps({"request" : "init_player"})
+            await send_request(reader, writer, request)
+
         if cmd == "exit":
             break
 

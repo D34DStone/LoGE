@@ -1,4 +1,4 @@
-marshmallow 
+marshmallow==2.19.5
 
 # to client (DEBUG)
 pygame

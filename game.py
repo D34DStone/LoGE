@@ -54,18 +54,48 @@ class Game(object):
             return wrapper
         return decorator
 
+    def check_authorized(f):
+        """ Decorator that checks if user authorized.
+
+        Decorator to be used only with request-handler functions:
+        :param self: Self game object
+        :param addr: Unique socket name
+        :param request: Dict with request
+        :return: Pair of header and message
+
+        Actually check if there is `uid` key in his session.
+        At worst return corresponding error.
+        """
+        @functools.wraps(f)
+        def wrapper(self, addr, request):
+            if not "uid" in self.sessions[addr]:
+                return Header.ERROR, Error.FORBIDDEN_REQUEST
+            else:
+                return f(self, addr, request)
+
+        return wrapper
+
     @check_request(AuthRequestSchema())
     def auth_handler(self, addr, request):
         self.sessions[addr]["uid"] = request["uid"]
         return Header.RESPONSE, "Authorized!"
 
     @check_request(EchoRequestSchema())
+    @check_authorized
     def echo_handler(self, addr, request):
-        if not self.sessions[addr].get("uid"):
-            return Header.ERROR, Error.FORBIDDEN_REQUEST
-
         echo = f"<{self.sessions[addr]['uid']}>: {request['data']}>"
         return Header.RESPONSE, echo
+
+    @check_authorized
+    def init_player_handler(self, addr, request):
+        self.engine.create_player(self.sessions[addr]["uid"])
+        return Header.RESPONSE, "Mb it realy has created player. Who knows..."
+
+    request_handlers = {
+                "auth" : auth_handler,
+                "echo" : echo_handler,
+                "init_player" : init_player_handler
+            }
 
     def connection_handler(self, addr):
         print(f"<{addr}> Connected to the server")
@@ -74,11 +104,6 @@ class Game(object):
     def disconnection_handler(self, addr):
         print(f"<{addr}> Disconnected from the server")
         del self.sessions[addr]
-
-    request_handlers = {
-                "auth" : auth_handler,
-                "echo" : echo_handler
-            }
 
     def process_exnternal_request(self, addr, data_type, data_size=0, data=bytes()):
         """Handles external request and returns result.
@@ -102,7 +127,7 @@ class Game(object):
                 return Header.ERROR, Error.SERIALIZE_ERROR
 
             data, err = BaseRequestSchema().load(request)
-            if err or not self.request_handlers.get(data["request"]):
+            if err or not data["request"] in self.request_handlers:
                 return Header.ERROR, Error.WRONG_REQUEST 
 
             handler = self.request_handlers[data["request"]]

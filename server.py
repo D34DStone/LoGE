@@ -16,7 +16,7 @@ class Server(object):
     def handle_data(self, data_type, data_size, socket, data):
         """Cals from `handle_connection` to process clients request.
 
-        Actually pass it to game engine.
+        Actually pass it to the game engine.
         """
         return self.game.process_exnternal_request(socket, data_type, data_size, data)
 
