@@ -39,6 +39,10 @@ async def loge_client(host, port):
             request = json.dumps({"request" : "init_player"})
             await send_request(reader, writer, request)
 
+        if cmd == "get world":
+            request = json.dumps({"request" : "get_world"})
+            await send_request(reader, writer, request)
+
         if cmd == "exit":
             break
 

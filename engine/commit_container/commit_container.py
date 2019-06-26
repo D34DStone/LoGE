@@ -1,4 +1,4 @@
-from marshmallow import Schema
+from marshmallow import Schema, fields
 from .commit import Commit
 from .change import BaseChange
 
@@ -19,11 +19,10 @@ class CommitContainer(object):
         self.current_commit = Commit(self.last_commit_id + 1)
 
     def append_change(self, change):
-        assert issubclass(
-            type(change),
-            BaseChange), "Given object have to be inheirted from BaseChange"
-
         self.current_commit.append_change(change)
+
+    def get_last_commit_id(self):
+        return self.last_commit_id
 
     def __init__(self):
         genesis_commit = Commit(0)

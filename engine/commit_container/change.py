@@ -26,5 +26,5 @@ class ChangesField(fields.Field):
 
     def _serialize(self, value, attr, obj):
         return list(map(lambda change:
-            ChangeField._serialize(change, attr, obj),
+            ChangeField._serialize(self, change, attr, obj),
             value))

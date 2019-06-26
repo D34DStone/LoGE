@@ -68,7 +68,7 @@ class Game(object):
         """
         @functools.wraps(f)
         def wrapper(self, addr, request):
-            if not "uid" in self.sessions[addr]:
+            if not self.sessions[addr].get("authorized"):
                 return Header.ERROR, Error.FORBIDDEN_REQUEST
             else:
                 return f(self, addr, request)
@@ -77,6 +77,7 @@ class Game(object):
 
     @check_request(AuthRequestSchema())
     def auth_handler(self, addr, request):
+        self.sessions[addr]["authorized"] = True
         self.sessions[addr]["uid"] = request["uid"]
         return Header.RESPONSE, "Authorized!"
 
@@ -91,10 +92,16 @@ class Game(object):
         self.engine.create_player(self.sessions[addr]["uid"])
         return Header.RESPONSE, "Mb it realy has created player. Who knows..."
 
+    @check_authorized
+    def get_world_handler(self, addr, request):
+        last_commit_id, world = self.engine.get_world_dump()
+        return Header.RESPONSE, json.dumps(world)
+
     request_handlers = {
                 "auth" : auth_handler,
                 "echo" : echo_handler,
-                "init_player" : init_player_handler
+                "init_player" : init_player_handler,
+                "get_world" : get_world_handler
             }
 
     def connection_handler(self, addr):

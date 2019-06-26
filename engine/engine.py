@@ -1,6 +1,8 @@
 import functools
 from .object import *
-from .schemas import *
+from .changes import *
+from .schemas import WorldDumpSchema
+from .commit_container import CommitContainer
 
 
 class Cell(object):
@@ -20,14 +22,6 @@ class Task(object):
         self.foo()
 
 
-class CommitsContainer(object):
-    
-    first_commit = 0
-    last_commit = 0
-    commits = list()
-
-    
-
 class Engine(object):
 
     field = list()
@@ -35,15 +29,14 @@ class Engine(object):
     objects_counter = 0
     ais = dict()
     tasks_queue = list()
-    commit_buffer = list()
-    commits = list()
-    current_commit = 0
 
     def __init__(self, width=512, height=512):
         self.width = width
         self.height = height
         for _ in range(width):
             self.field.append([Cell() for _ in range(height)])
+
+        self.commit_container = CommitContainer()
 
     def get_cell(self, x, y):
         if x < -self.width / 2 or x > self.width / 2 or y < -self.height / 2 or y > self.height / 2:
@@ -63,15 +56,21 @@ class Engine(object):
         obj.id = self.objects_counter
         self.objects_counter += 1
         self.objects[obj.id] = obj
+        self.commit_container.append_change(CreateChange(object=obj))
 
-        log = CreateLogSchema().dump(dict(object=obj)).data
-        from marshmallow import pprint      # Just to debug. Delete it...
-        pprint(log)
-        self.commit_buffer.append(log)
+    def get_world_dump(self):
+        """Returns touple of last commit id and world dumped to string.
+        """
+        last_commit_id = self.commit_container.get_last_commit_id()
+        world = dict(
+            last_commit_id = last_commit_id,
+            width = self.width,
+            height = self.height,
+            objects = list(self.objects.values()))
 
+        res, err = WorldDumpSchema().dump(world)
+        return last_commit_id, res
 
-    def dump_world(self):
-        objects = list(map(lambda o: o.Schema().dump(o), self.objects))
 
     def suspend(f):
         """Decorator which adds given function to `tasks_queue` instead of perform it.
@@ -96,9 +95,5 @@ class Engine(object):
         for t in self.tasks_queue:
             t.run()
 
-        self.tasks_queue = []
-    
-        self.current_commit += 1
-        current_commit = dict(id=self.current_commit + 1, changes=self.commit_buffer)
-        self.commit_buffer = list()
-
+        self.tasks_queue = [] 
+        self.commit_container.push()

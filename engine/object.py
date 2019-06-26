@@ -32,6 +32,13 @@ class ObjectField(fields.Field):
         return data
 
 
+class ObjectsField(fields.Field):
+    def _serialize(self, value, attr, obj):
+        return list(
+            map(lambda obj: ObjectField._serialize(self, obj, attr, obj),
+                value))
+
+
 class Player(Object):
     kind = "player"
     uid = None
