@@ -1,5 +1,7 @@
 import importlib
+import asyncio 
 from .game import Game
+from .network_client import NetworkClient
 
 class Client(object):
 
@@ -17,10 +19,13 @@ class Client(object):
         #self.network_client = NetworkClient(config)
         self.game_running = True    # Debug 
         self.game = Game(self.config, self)
+        self.network_client = NetworkClient(self.config, self)
 
     def get_objects(self):
         return []
 
     async def run(self):
-        await self.game.run()
+        await asyncio.gather(
+            self.game.run(), 
+            self.network_client.run())
 

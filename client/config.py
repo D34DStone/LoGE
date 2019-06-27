@@ -1,6 +1,7 @@
 class Config:
     SERVER_HOST = "0.0.0.0"
     SERVER_PORT = 5000
+    REQUEST_INTERVAL = 1 / 2
 
     BACKGROUND_COLOR = (0, 0, 0)
     WINDOW_WIDTH = 1024
