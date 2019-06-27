@@ -1,11 +1,13 @@
-from request_schemas import *
-from protocol import Header, Error
-from engine.engine import Engine 
-from marshmallow import ValidationError
 import asyncio
 import json
 import enum
 import functools
+
+from protocol import Header, Error
+from . import request_schemas, response_schemas
+from .creature import Creature
+from engine import Engine, API
+from marshmallow import ValidationError
 
 # debug
 from marshmallow import pprint
@@ -16,9 +18,11 @@ class Game(object):
 
     sessions = dict()
     engine = None
+    api = None
 
     def __init__(self):
         self.engine = Engine()
+        self.api = API(self.engine)
 
     async def run(self):
         """Coroutine that provides entery point to world
@@ -75,13 +79,13 @@ class Game(object):
 
         return wrapper
 
-    @check_request(AuthRequestSchema())
+    @check_request(request_schemas.AuthRequestSchema())
     def auth_handler(self, addr, request):
         self.sessions[addr]["authorized"] = True
         self.sessions[addr]["uid"] = request["uid"]
         return Header.RESPONSE, "Authorized!"
 
-    @check_request(EchoRequestSchema())
+    @check_request(request_schemas.EchoRequestSchema())
     @check_authorized
     def echo_handler(self, addr, request):
         echo = f"<{self.sessions[addr]['uid']}>: {request['data']}>"
@@ -89,13 +93,15 @@ class Game(object):
 
     @check_authorized
     def init_player_handler(self, addr, request):
-        self.engine.create_player(self.sessions[addr]["uid"])
-        return Header.RESPONSE, "Mb it realy has created player. Who knows..."
+        self.api.add_object(Creature())
+        return Header.RESPONSE, "Creature was created."
 
     @check_authorized
     def get_world_handler(self, addr, request):
-        last_commit_id, world = self.engine.get_world_dump()
-        return Header.RESPONSE, json.dumps(world)
+        world = self.api.get_world_dump()
+        response = dict(world=world)
+        response, err = response_schemas.GetWorldSchema().dump(response)
+        return Header.RESPONSE, json.dumps(response)
 
     request_handlers = {
                 "auth" : auth_handler,
@@ -133,7 +139,7 @@ class Game(object):
             except json.decoder.JSONDecodeError:
                 return Header.ERROR, Error.SERIALIZE_ERROR
 
-            data, err = BaseRequestSchema().load(request)
+            data, err = request_schemas.BaseRequestSchema().load(request)
             if err or not data["request"] in self.request_handlers:
                 return Header.ERROR, Error.WRONG_REQUEST 
 

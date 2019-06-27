@@ -37,14 +37,3 @@ class ObjectsField(fields.Field):
         return list(
             map(lambda obj: ObjectField._serialize(self, obj, attr, obj),
                 value))
-
-
-class Player(Object):
-    kind = "player"
-    uid = None
-
-    def __init__(self, uid):
-        self.uid = uid
-
-    class Schema(Object.Schema):
-        uid = fields.Int()
