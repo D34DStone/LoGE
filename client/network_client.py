@@ -4,6 +4,8 @@ import enum
 import functools
 from protocol import Header, Error, make_request, parse_header
 
+from marshmallow import pprint # DEBUG
+
 
 class State(enum.Enum):
     AUTHORIZATION = 1
@@ -18,36 +20,43 @@ class NetworkClient(object):
     config = None
     state = None     
     is_working = False
+    reader = None 
+    writer = None
 
     def __init__(self, config, client):
        self.state = State.AUTHORIZATION
        self.config = config
        self.client = client
 
-    async def send_request(reader, writer, data, header=Header.REQUEST):
+    async def send_request(self, data, header=Header.REQUEST):
         req = make_request(Header.REQUEST, data)
-        writer.write(req)
-        await writer.drain()
-        data_type, data_size = parse_header(await reader.readline())
-        data = await reader.read(data_size)
+        self.writer.write(req)
+        await self.writer.drain()
+        data_type, data_size = parse_header(await self.reader.readline())
+        data = await self.reader.read(data_size)
         if data_type == Header.ERROR:
             raise ValueError("Error: " + data.decode())
 
         return data
 
-    async def auth(self, reader, writer):
-        print("Let auth!")
-        pass
+    async def auth(self):
+        resp = await self.send_request(json.dumps({"request" : "auth", "uid" : 123}))
 
-    async def create_player(self, reader, writer):
-        print("Lets create player!")
-        pass
+    async def create_player(self):
+        resp = await self.send_request(json.dumps({"request" : "init_player"}))
+        await asyncio.sleep(0.2)
 
-    async def get_world(self, reader, writer):
-        print("Lets get world!")
-
-    async def update(self, reader, writer):
-        print("Lets update world")
+    async def get_world(self):
+        resp = await self.send_request(json.dumps({"request" : "get_world"}))
+        resp = json.loads(resp)
+        world = resp["world"]
+        self.client.world = world
+        self.client.game_running = True
+        pprint(world)
+        
+    async def update(self):
+        resp = await self.send_request(json.dumps({"request" : "get_commits", "last_commit_id" : self.last_commit_id}))
+        await self.get_world()
 
     state_handlers = {
             State.AUTHORIZATION : (auth, State.CREATING_PLAYER),
@@ -60,7 +69,6 @@ class NetworkClient(object):
         try:
             await request_fun()
         except Exception as err:
-            print(str(err))
             print(f"next try after {fail_delay} seconds...")
             await asyncio.sleep(fail_delay)
         else:
@@ -68,14 +76,14 @@ class NetworkClient(object):
 
     async def run(self):
         try:
-            reader, writer = await asyncio.open_connection(self.config.SERVER_HOST, self.config.SERVER_PORT)
+            self.reader, self.writer = await asyncio.open_connection(self.config.SERVER_HOST, self.config.SERVER_PORT)
         except OSError:
-            print("Con't connect to the server. Network Client ends his work.")
+            print("Can't connect to the server. Network Client ends his work.")
             return
 
         self.is_working = True
         while(self.is_working):
             handler, next_state = self.state_handlers[self.state]
-            handler = functools.partial(handler, self, reader, writer)
+            handler = functools.partial(handler, self)
             await self.try_request(handler, next_state)
             await asyncio.sleep(self.config.REQUEST_INTERVAL)

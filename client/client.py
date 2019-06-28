@@ -16,8 +16,6 @@ class Client(object):
             print("Can't load config")
             exit(1)
         
-        #self.network_client = NetworkClient(config)
-        self.game_running = True    # Debug 
         self.game = Game(self.config, self)
         self.network_client = NetworkClient(self.config, self)
 
