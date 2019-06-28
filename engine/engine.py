@@ -7,7 +7,6 @@ from .commit_container import CommitContainer
 class Task(object):
     """Suspended function.
     """
-
     foo = None
 
     def __init__(self, foo):
@@ -44,5 +43,5 @@ class Engine(object):
         for t in self.tasks_queue:
             t.run()
 
-        self.tasks_queue = [] 
+        self.tasks_queue = []
         self.commit_container.push()

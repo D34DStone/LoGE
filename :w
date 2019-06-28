@@ -102,24 +102,21 @@ class Game(object):
         world = self.api.get_world_dump()
         response = dict(world=world)
         response, err = response_schemas.GetWorldSchema().dump(response)
-        self.sessions[addr]["last_commit"] = self.api.get_last_commit_id()
         return Header.RESPONSE, json.dumps(response)
 
     @check_authorized
     def update_handler(self, addr, request):
-        """ Attention, big kostyl! Fix it """
         commits = self.api.get_commits(start_from=self.sessions[addr]["last_commit"])
-        from engine.commit_container.commit import Commit
-        t, e = Commit.Schema(many=True).dump(commits["commits"])
-
-        response = {
-                "type" : "update",
-                "commit_range" : {
-                        "commits" : t
-                    }
-            }
-
-        self.sessions[addr]["last_commit"] = self.api.get_last_commit_id()
+        #pprint(commits)
+        #from engine.commit_container.commit import Commit
+        #t, e = Commit.Schema(many=True).dump(commits["commits"])
+        #print(t, e)
+        from engine.api.schemas import CommitRangeSchema
+        t, e = CommitRangeSchema().dump(commits)
+        print(t, e)
+        response = dict(commit_range=commits)
+        response, err = response_schemas.UpdateSchema().dump(response)
+        #pprint(response)
         return Header.RESPONSE, json.dumps(response)
 
     request_handlers = {
