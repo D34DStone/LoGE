@@ -19,7 +19,8 @@ class Task(object):
 class Engine(object):
 
     objects_counter = 0
-    objects = dict()
+    objects = dict()  # dict where key is object id and value is obj
+    players = dict()  # dict where key is user addr and value is it's player obj
     ais = dict()
     tasks_queue = list()
 
@@ -27,16 +28,19 @@ class Engine(object):
         self.commit_container = CommitContainer()
 
     def add_object(self, obj, x, y):
-        """ Complete object and append to other objects.
-
-        :param obj: Already created object
-        :return: Return object (or not???)
-        """
         obj.x, obj.y = x, y
         obj.id = self.objects_counter
         self.objects_counter += 1
         self.objects[obj.id] = obj
         self.commit_container.append_change(CreateChange(object=obj))
+
+    def bind_as_player(self, addr, obj):
+        self.players[addr] = obj
+
+    def move_object(self, obj, x, y):
+        obj.x, obj.y = x, y
+        change = MoveChanged(obj.id, x, y)
+        self.commit_container.append_change(change)
 
     def iterate_world(self):
         print(f"Iteration: task queue size: {len(self.tasks_queue)}")

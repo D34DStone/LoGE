@@ -1,3 +1,6 @@
+"""Module that describes what API have to return.
+"""
+
 from marshmallow import Schema, fields
 from engine.object import ObjectsField
 from engine.commit_container.commit import Commit

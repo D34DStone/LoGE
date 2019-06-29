@@ -10,3 +10,8 @@ class AuthRequestSchema(Schema):
 
 class EchoRequestSchema(Schema):
     data = fields.Str(required=True)
+
+
+class MoveRequestSchema(required=True):
+    x = fields.Int(required=True)
+    y = fields.Int(required=True)

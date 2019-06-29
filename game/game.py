@@ -6,6 +6,7 @@ import functools
 from protocol import Header, Error
 from . import request_schemas, response_schemas
 from .creature import Creature
+from .player import Player
 from engine import Engine, API
 from marshmallow import ValidationError
 
@@ -35,14 +36,10 @@ class Game(object):
             await asyncio.sleep(Game.ENGINE_ITERATE_INTERVAL)
 
     def check_request(request_schema):
-        """ Checks if given request is valid.
+        """ Checks if given request is valid. An can be 
+        serialized using given schema.
 
-        Decorator to be used only with request-handler functions:
-        :param self: Self game object
-        :param addr: Unique socket name
-        :param request: Dict with request
-        :return: Pair of header and message
-
+        Decorator has to be used only with request-handler functions.
         Validates request, at worst returns error header and messages, otherwise 
         pass validated request to decorated function.
         """
@@ -61,12 +58,7 @@ class Game(object):
     def check_authorized(f):
         """Decorator that checks if user authorized.
 
-        Decorator to be used only with request-handler functions:
-        :param self: Self game object
-        :param addr: Unique socket name
-        :param request: Dict with request
-        :return: Pair of header and message
-
+        Decorator has to be used only with request-handler functions.
         Actually checks if `authorized` key exists and its value equals `True`.
         At worst return corresponding error.
         """
@@ -94,8 +86,15 @@ class Game(object):
 
     @check_authorized
     def init_player_handler(self, addr, request):
-        self.api.add_object(Creature())
-        return Header.RESPONSE, "Creature was created."
+        player = Player(addr)
+        self.api.add_player(player)
+        return Header.RESPONSE, "Player created."
+
+    @check_request(request_schemas.MoveRequestSchema())
+    @check_authorized
+    def move_handler(self, addr, request):
+        player_id = self.api.get_player_id(addr)
+        self.api.move_object(player_id, request["x"], request["y"])
 
     @check_authorized
     def get_world_handler(self, addr, request):
