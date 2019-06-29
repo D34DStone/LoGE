@@ -12,6 +12,6 @@ class EchoRequestSchema(Schema):
     data = fields.Str(required=True)
 
 
-class MoveRequestSchema(required=True):
+class MoveRequestSchema(Schema):
     x = fields.Int(required=True)
     y = fields.Int(required=True)

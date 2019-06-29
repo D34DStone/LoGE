@@ -32,8 +32,10 @@ class Game(object):
         self.screen_size = (config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
         self.screen = pygame.display.set_mode(self.screen_size)
 
-    def draw_object(self, obj):
-        print("I drew a object!")
+    def draw_object(self, screen, obj):
+        rect = pygame.Rect((obj["x"] + 12) * 20, (obj["y"] + 12) * 20, 20, 20)
+        color = 255, 255, 255
+        pygame.draw.rect(screen, color, rect)
 
     async def run(self):
 
@@ -44,7 +46,21 @@ class Game(object):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-    
+   
+                if event.type == pygame.KEYDOWN:
+                    move_map = {
+                                'w' : (0, -1),
+                                'a' : (-1, 0),
+                                's' : (0, 1),
+                                'd' : (1, 0)
+                            }
+                    try: 
+                        v = move_map[chr(event.key)]
+                    except:
+                        pass
+                    else:
+                        await self.client.handle_move(v)
+
             if not self.client.game_running:
                 continue
 
@@ -52,12 +68,7 @@ class Game(object):
 
             self.screen.fill(self.config.BACKGROUND_COLOR)
             for obj in objects:
-                self.draw_object(obj)
-
-            # DEBUG DRAW BEGIN
-            player.draw(self.screen)
-            player.move([1, 1])
-            # DEBUG DRAW END 
+                self.draw_object(self.screen, obj)
 
             pygame.display.flip()
             

@@ -38,7 +38,7 @@ class API:
         return self.engine.commit_container.get_last_commit_id()
 
     def get_player_id(self, addr) -> int:
-        return self.players[addr].id
+        return self.engine.players[addr].id
 
     def suspend(f):
         """Decorator to add wrapper function to engine tasks to do it later.
@@ -57,19 +57,19 @@ class API:
         from random import randint
         from functools import partial
         rng = partial(randint, -12, 12)
-        self.engine.add_object(obj, rng(), eng())
+        self.engine.add_object(obj, rng(), rng())
 
     @suspend
     def add_player(self, addr, obj):
-         self.engine.add_object(obj)
          self.engine.bind_as_player(addr, obj)
+         self.add_object(obj)
 
     @suspend
     def move_object(self, oid, x, y):
         """Change objects coords, move them on vector (x, y).
         """
         obj = self.engine.objects[oid]
-        self.engine.move_object(obj.id, obj.x + x, obj.y + y) 
+        self.engine.move_object(obj, obj.x + x, obj.y + y) 
 
     @suspend
     def move_object_ip(self, oid, x, y) -> None:

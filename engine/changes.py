@@ -1,3 +1,4 @@
+from marshmallow import fields
 from .commit_container import BaseChange
 from .object import ObjectField
 
@@ -23,8 +24,8 @@ class MoveChange(BaseChange):
 
     def __init__(self, object_id, x, y):
         self.object_id = object_id
-        self.new_x = x
-        self.new_y = y
+        self.x = x
+        self.y = y
 
     class Schema(BaseChange.Schema):
         object_id = fields.Int(required=True)

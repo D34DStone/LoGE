@@ -39,7 +39,7 @@ class Engine(object):
 
     def move_object(self, obj, x, y):
         obj.x, obj.y = x, y
-        change = MoveChanged(obj.id, x, y)
+        change = MoveChange(obj.id, x, y)
         self.commit_container.append_change(change)
 
     def iterate_world(self):

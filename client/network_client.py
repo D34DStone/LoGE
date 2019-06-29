@@ -50,13 +50,13 @@ class NetworkClient(object):
         resp = await self.send_request(json.dumps({"request" : "get_world"}))
         resp = json.loads(resp)
         world = resp["world"]
-        self.client.world = world
-        self.client.game_running = True
-        pprint(world)
+        self.client.handle_world(world)
         
     async def update(self):
         resp = await self.send_request(json.dumps({"request" : "update"}))
-        print(resp)
+        resp = json.loads(resp)
+        new_commits = resp["commit_range"]["commits"]
+        self.client.handle_changes(new_commits)
 
     state_handlers = {
             State.AUTHORIZATION : (auth, State.CREATING_PLAYER),
@@ -69,6 +69,7 @@ class NetworkClient(object):
         try:
             await request_fun()
         except Exception as err:
+            raise err
             print(str(err))
             print(f"next try after {fail_delay} seconds...")
             await asyncio.sleep(fail_delay)

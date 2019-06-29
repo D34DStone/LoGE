@@ -1,5 +1,5 @@
-from creature import Creature
 from marshmallow import fields
+from .creature import Creature
 
 class Player(Creature):
 

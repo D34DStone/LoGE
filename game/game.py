@@ -87,7 +87,7 @@ class Game(object):
     @check_authorized
     def init_player_handler(self, addr, request):
         player = Player(addr)
-        self.api.add_player(player)
+        self.api.add_player(addr, player)
         return Header.RESPONSE, "Player created."
 
     @check_request(request_schemas.MoveRequestSchema())
@@ -95,6 +95,7 @@ class Game(object):
     def move_handler(self, addr, request):
         player_id = self.api.get_player_id(addr)
         self.api.move_object(player_id, request["x"], request["y"])
+        return Header.RESPONSE, "Moved."
 
     @check_authorized
     def get_world_handler(self, addr, request):
@@ -127,6 +128,7 @@ class Game(object):
                 "init_player" : init_player_handler,
                 "get_world" : get_world_handler,
                 "update" : update_handler,
+                "move" : move_handler
             }
 
     def connection_handler(self, addr):
