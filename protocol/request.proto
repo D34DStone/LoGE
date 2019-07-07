@@ -1,4 +1,17 @@
 syntax = "proto3";
+import "player.proto";
+import "world.proto";
+import "change_log.proto";
+
+message Header {
+    enum MessageType {
+        UNKNOWN = 0;
+        AUTH = 1;
+        INIT_PLAYER = 2;
+        GET_WORLD = 3;
+        UPDATE = 4;
+    }
+}
 
 message AuthRequest {
     string login = 1;
@@ -7,4 +20,28 @@ message AuthRequest {
 message AuthResponse {
     bool error_occured = 1;
     string msg = 2;
+}
+
+message InitPlayerRequest { }
+
+message InitPlayerResponse {
+    bool error_occured = 1;
+    string msg = 2;
+    Player player = 3;
+}
+
+message GetWorldRequest { }
+
+message GetWorldResponse {
+    bool error_occured = 1;
+    string msg = 2;
+    World world = 3;
+}
+
+message UpdateRequest { }
+
+message UpdateResponse {
+    bool error_occured = 1;
+    string msg = 2;
+    repeated ChangeLog changes = 3; 
 }

@@ -1,0 +1,19 @@
+syntax = "proto3";
+import "creature.proto";
+
+message CreateLog {
+    Creature creature = 1;
+}
+
+message MoveLog {
+    int32 creature_id = 1;
+    int32 x = 2;
+    int32 y = 3;
+}
+
+message ChangeLog {
+    oneof log {
+        CreateLog create_log = 1;
+        MoveLog move_log = 2;
+    }
+}

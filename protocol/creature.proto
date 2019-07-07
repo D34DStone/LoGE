@@ -1,14 +1,15 @@
 syntax = "proto3";
 
 message Creature {
-    string name = 1;
-    int32 level = 2;
-    int32 x = 3;
-    int32 y = 4;
+    int32 id = 1;
+    string name = 2;
+    int32 level = 3;
+    int32 x = 4;
+    int32 y = 5;
 
-    // How object is looking right now
+    // How the creature looks now
     enum Form {
         DEFAULT = 0;    
     } 
-    Form form = 5;
+    Form form = 6;
 }

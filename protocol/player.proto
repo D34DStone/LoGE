@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Player {
+    int32 object_id = 1;
+}
