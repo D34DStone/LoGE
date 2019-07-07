@@ -146,15 +146,7 @@ class Game(object):
         :param data_type: Header with which request was sent
         :return: Returns protocol header and data of the response
         """
-        if data_type == Header.CONNECTED:
-            self.connection_handler(addr)
-            return Header.EMPTY, bytes()
-
-        elif data_type == Header.DISCONNECTED:
-            self.disconnection_handler(addr)
-            return Header.EMPTY, bytes()
-
-        elif data_type == Header.REQUEST:
+        if data_type == Header.REQUEST:
             try:
                 request = json.loads(data)
             except json.decoder.JSONDecodeError:

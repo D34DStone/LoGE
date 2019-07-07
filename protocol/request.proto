@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+message AuthRequest {
+    string login = 1;
+}
+
+message AuthResponse {
+    bool error_occured = 1;
+    string msg = 2;
+}

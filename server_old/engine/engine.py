@@ -34,9 +34,6 @@ class Engine(object):
         self.objects[obj.id] = obj
         self.commit_container.append_change(CreateChange(object=obj))
 
-    def bind_as_player(self, addr, obj):
-        self.players[addr] = obj
-
     def move_object(self, obj, x, y):
         obj.x, obj.y = x, y
         change = MoveChange(obj.id, x, y)

@@ -61,7 +61,7 @@ class API:
 
     @suspend
     def add_player(self, addr, obj):
-         self.engine.bind_as_player(addr, obj)
+         self.engine.players[addr] = obj
          self.add_object(obj)
 
     @suspend

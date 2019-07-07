@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message Creature {
+    string name = 1;
+    int32 level = 2;
+    int32 x = 3;
+    int32 y = 4;
+
+    // How object is looking right now
+    enum Form {
+        DEFAULT = 0;    
+    } 
+    Form form = 5;
+}
