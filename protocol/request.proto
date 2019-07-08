@@ -10,7 +10,14 @@ message Header {
         INIT_PLAYER = 2;
         GET_WORLD = 3;
         UPDATE = 4;
+
+        ERROR = 5;
     }
+    MessageType header = 1;
+}
+
+message ErrorResponse {
+    string msg = 1;
 }
 
 message AuthRequest {

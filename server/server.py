@@ -36,10 +36,10 @@ class Server:
         writer.close()
 
     def on_connect(self, addr):
-        print(f"<{addr}> connected")
+        self.game.on_connect(addr)
 
     def on_disconnect(self, addr):
-        print(f"<{addr}> disconnected")
+        self.game.on_disconnect(addr)
 
     def on_data(self, addr, header, data):
-        print(f"<addr> : {header} {data}")
+        self.game.on_request(addr, header, data)

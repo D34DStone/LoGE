@@ -15,11 +15,14 @@ class Engine:
     def __init__(self, config):
         self.config = config
 
-    async def run():
+    async def run(self):
         running = True
         while running:
-            for t in tasks:
+            print("Let's make an inter!")
+            for t in self.tasks:
                 t()
+
+            self.tasks = list()
 
             await asyncio.sleep(self.config.ENGINE_ITER_INTERVAL)
 
